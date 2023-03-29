@@ -6,9 +6,9 @@
   export let colorIndex = Math.floor(Math.random() * 100);
   export let rainbow = true;
 
-  $: colorfulText = makeColorful(text);
+  $: colorfulText = makeColorful(text, colorIndex, rainbow);
 
-  function makeColorful(text) {
+  function makeColorful(text, colorIndex, rainbow) {
     const words = text.split(" ");
     const colors = words.map((_word, wordIndex) => {
       const i = rainbow ? colorIndex + wordIndex : colorIndex;

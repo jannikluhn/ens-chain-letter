@@ -24,6 +24,11 @@
   let waitingForNetworkSwitch = false;
   let waitingForTransfer = false;
 
+  let currentOwnerENSNameAlt;
+  let currentOwnerIndexAlt;
+  $: currentOwnerENSNameSafe = $currentOwnerENSName || currentOwnerENSNameAlt;
+  $: currentOwnerIndexSafe = $currentOwnerIndex || currentOwnerIndexAlt;
+
   $: showConnectButton = $connectionRequired || waitingForConnection;
   $: showSwitchNetworkButton =
     !showConnectButton && ($networkSwitchRequired || waitingForNetworkSwitch);
@@ -32,9 +37,9 @@
     $currentOwnerAddress &&
     $signerAddress.toLowerCase() === $currentOwnerAddress.toLowerCase();
 
-  $: currentOwnerText = $currentOwnerENSName || "...";
-  $: currentOwnerIndexText = $currentOwnerIndex
-    ? " (#" + $currentOwnerIndex.toString() + ")"
+  $: currentOwnerText = currentOwnerENSNameSafe || "...";
+  $: currentOwnerIndexText = currentOwnerIndexSafe
+    ? " (#" + currentOwnerIndexSafe.toString() + ")"
     : "";
 
   let receiverName = "";
@@ -122,17 +127,31 @@
     const accounts = await window.ethereum.request({ method: "eth_accounts" });
     if (accounts.length) {
       await defaultEvmStores.setProvider();
+    } else {
+      const provider = new ethers.providers.Web3Provider(
+        window.ethereum,
+        deployment.chainId
+      );
+      const contract = new ethers.Contract(
+        deployment.ensChainLetter.address,
+        deployment.ensChainLetter.abi,
+        provider
+      );
+      const ownerAddress = await contract.ownerOf(0);
+      const ownerENSName = await provider.lookupAddress(ownerAddress);
+      currentOwnerENSNameAlt = ownerENSName;
+      currentOwnerIndexAlt = await contract.numLetterTransfers();
     }
   });
 </script>
 
 <h2 class="text-white text-4xl text-center mb-4 mt-24">
-  Current owner: <Link href="/stamp/{$currentOwnerIndex}"
+  Current owner: <Link href="/stamp/{currentOwnerIndexSafe}"
     ><span class="font-semibold"
       ><ColorfulText
         text={currentOwnerText}
         rainbow={false}
-        colorIndex={$currentOwnerIndex}
+        colorIndex={currentOwnerIndexSafe}
         underlineOnHover={true}
       /></span
     ></Link
@@ -140,7 +159,7 @@
   <ColorfulText
     text={currentOwnerIndexText}
     rainbow={false}
-    colorIndex={$currentOwnerIndex}
+    colorIndex={currentOwnerIndexSafe}
   />
 </h2>
 
