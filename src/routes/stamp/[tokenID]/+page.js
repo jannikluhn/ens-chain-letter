@@ -1,5 +1,5 @@
 import { error } from "@sveltejs/kit";
-import { PUBLIC_METADATA_URL } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 
 /** @type {import('./$types').PageLoad} */
 export async function load({ fetch, params }) {
@@ -8,7 +8,9 @@ export async function load({ fetch, params }) {
     throw error(400, "Invalid tokenID");
   }
 
-  const summaryResponse = await fetch(`${PUBLIC_METADATA_URL}/summary.json`);
+  const summaryResponse = await fetch(
+    `${env.PUBLIC_METADATA_URL}/summary.json`
+  );
   const summary = await summaryResponse.json();
 
   let stamp;
@@ -24,6 +26,6 @@ export async function load({ fetch, params }) {
 
   return {
     stamp: stamp,
-    svgUrl: `${PUBLIC_METADATA_URL}/${stamp.tokenID}.svg`,
+    svgUrl: `${env.PUBLIC_METADATA_URL}/${stamp.tokenID}.svg`,
   };
 }

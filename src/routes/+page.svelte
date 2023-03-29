@@ -1,5 +1,5 @@
 <script>
-  import { PUBLIC_METADATA_URL } from "$env/static/public";
+  import { env } from "$env/dynamic/public";
   import HolderSection from "../HolderSection.svelte";
   import DownArrow from "../DownArrow.svelte";
   import ColorfulText from "../ColorfulText.svelte";
@@ -17,7 +17,7 @@
     </div>
     <img
       class="w-full h-full"
-      src={PUBLIC_METADATA_URL + "/0.svg"}
+      src={env.PUBLIC_METADATA_URL + "/0.svg"}
       alt="ENS Chain Letter NFT"
     />
   </div>
