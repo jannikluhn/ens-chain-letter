@@ -10,6 +10,7 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.2",
     "@sveltejs/adapter-auto": "^2.0.0",
+    "@sveltejs/adapter-node": "^1.2.3",
     "@sveltejs/kit": "^1.5.0",
     "autoprefixer": "^10.4.14",
     "ethers": "^5.7.2",
