@@ -16,7 +16,7 @@ async function updateLetterMetadata(events) {
       "A unique token being passed around between ENS community members",
     image: "https://ens-chain-letter.xyz/nft/0.svg",
   };
-  const angles = getAnglesFromEvents(events);
+  const angles = await getAnglesFromEvents(events);
   const svg = createLetterSVG(angles);
   await writeMetadata(0, metadata, svg);
 }
@@ -27,7 +27,7 @@ async function updateStampMetadata(events, i) {
     description: "A small prize awarded for passing on the ENS Chain Letter",
     image: `https://ens-chain-letter.xyz/nft/${i}.svg`,
   };
-  const angles = getAnglesFromEvents(events.slice(0, i));
+  const angles = await getAnglesFromEvents(events.slice(0, i));
   const svg = createStampSVG(angles);
   await writeMetadata(i, metadata, svg);
 }
@@ -39,8 +39,10 @@ async function writeMetadata(tokenID, metadata, svg) {
   await fs.writeFile(svgPath, svg);
 }
 
-function getAnglesFromEvents(events) {
-  let angles = [0];
+async function getAnglesFromEvents(events) {
+  const deployment = await hre.deployments.get("ENSChainLetter");
+  const originalENSNode = deployment.args[0];
+  let angles = [getAngleFromENSNode(originalENSNode)];
   for (const event of events) {
     const ensNode = event.topics[3];
     angles.push(getAngleFromENSNode(ensNode));
