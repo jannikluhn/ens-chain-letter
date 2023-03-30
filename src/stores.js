@@ -60,7 +60,7 @@ export const currentOwnerAddressAndIndex = readable(undefined, (set) => {
     Promise.all([contract.ownerOf(0), contract.numLetterTransfers()]).then(
       ([owner, numLetterTransfers]) => {
         if (!isSet) {
-          set([owner, numLetterTransfers - 1]);
+          set([owner, numLetterTransfers]);
           isSet = true;
         }
       }

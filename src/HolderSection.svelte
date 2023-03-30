@@ -151,7 +151,7 @@
       ><ColorfulText
         text={currentOwnerText}
         rainbow={false}
-        colorIndex={currentOwnerIndexSafe}
+        colorIndex={currentOwnerIndexSafe - 1}
         underlineOnHover={true}
       /></span
     ></Link
@@ -159,7 +159,7 @@
   <ColorfulText
     text={currentOwnerIndexText}
     rainbow={false}
-    colorIndex={currentOwnerIndexSafe}
+    colorIndex={currentOwnerIndexSafe - 1}
   />
 </h2>
 
