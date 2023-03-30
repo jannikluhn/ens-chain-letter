@@ -94,17 +94,17 @@
       }
 
       const hash = ethers.utils.namehash(receiverName);
-      /* try { */
-      /*   if (await $ensChainLetterContract.previousLetterOwners(hash)) { */
-      /*     errorMsg = */
-      /*       "The given receiver has already owned the NFT in the past, please choose another one."; */
-      /*     return; */
-      /*   } */
-      /* } catch (e) { */
-      /*   errorMsg = "Failed to check if receiver already owned token."; */
-      /*   console.error(e); */
-      /*   return; */
-      /* } */
+      try {
+        if (await $ensChainLetterContract.previousLetterOwners(hash)) {
+          errorMsg =
+            "The given receiver has already owned the NFT in the past, please choose another one.";
+          return;
+        }
+      } catch (e) {
+        errorMsg = "Failed to check if receiver already owned token.";
+        console.error(e);
+        return;
+      }
 
       try {
         const tx = await $ensChainLetterContract.transferLetter(
