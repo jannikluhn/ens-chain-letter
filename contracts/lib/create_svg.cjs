@@ -16,6 +16,7 @@ const colorScale = chroma
     "#FFFF00",
     "#FF7F00",
     "#FF0000",
+    "#9400D3",
   ])
   .mode("lch");
 const lightGray = chroma("#444444");
