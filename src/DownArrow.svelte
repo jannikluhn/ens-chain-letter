@@ -29,7 +29,7 @@
     xmlns:xlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 90 32"
     xml:space="preserve"
-    in:fade={{ duration: 1000, delay: 8000 }}
+    in:fade={{ duration: 1000, delay: 5000 }}
     out:fade={{ duration: 500, delay: 0 }}
     class="cursor-pointer"
     on:click={handleClick}
