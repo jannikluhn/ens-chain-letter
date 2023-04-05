@@ -10,6 +10,10 @@ const fallbackProvider = new ethers.providers.JsonRpcProvider(
 
 export const ethereum = writable(null);
 
+export const isUsingFallbackProvider = derived(ethereum, ($ethereum) => {
+  return $ethereum === null;
+});
+
 export const provider = derived(ethereum, ($ethereum) => {
   if ($ethereum) {
     return new ethers.providers.Web3Provider($ethereum, deployment.chainId);

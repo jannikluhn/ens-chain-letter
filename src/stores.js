@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { derived, readable } from "svelte/store";
-import { chainID, provider } from "./ethereum.js";
+import { chainID, provider, isUsingFallbackProvider } from "./ethereum.js";
 import * as deployment from "./deployment.js";
 
 export const networkSwitchRequired = derived(chainID, ($chainID) => {
@@ -8,15 +8,21 @@ export const networkSwitchRequired = derived(chainID, ($chainID) => {
 });
 
 export const ensChainLetterContract = derived(
-  [provider, networkSwitchRequired],
-  ([$provider, $networkSwitchRequired]) => {
+  [provider, networkSwitchRequired, isUsingFallbackProvider],
+  ([$provider, $networkSwitchRequired, $isUsingFallbackProvider]) => {
     if (!$provider || $networkSwitchRequired) {
       return null;
+    }
+    let signer;
+    if (!$isUsingFallbackProvider) {
+      signer = $provider.getSigner();
+    } else {
+      signer = $provider;
     }
     return new ethers.Contract(
       deployment.ensChainLetter.address,
       deployment.ensChainLetter.abi,
-      $provider.getSigner()
+      signer
     );
   }
 );
