@@ -1,17 +1,16 @@
 <script>
-  import { onMount } from "svelte";
   import { ethers } from "ethers";
 
-  import {
-    provider,
-    signerAddress,
-    defaultEvmStores,
-  } from "svelte-ethers-store";
   import Button from "./Button.svelte";
   import ColorfulText from "./ColorfulText.svelte";
   import Link from "./Link.svelte";
   import {
-    connectionRequired,
+    ethereum,
+    provider,
+    accountAvailable,
+    firstAccount,
+  } from "./ethereum.js";
+  import {
     networkSwitchRequired,
     ensChainLetterContract,
     currentOwnerAddress,
@@ -19,28 +18,23 @@
     currentOwnerIndex,
   } from "./stores.js";
   import * as deployment from "./deployment.js";
-  import { env } from "$env/dynamic/public";
 
   let waitingForConnection = false;
   let waitingForNetworkSwitch = false;
   let waitingForTransfer = false;
 
-  let currentOwnerENSNameAlt;
-  let currentOwnerIndexAlt;
-  $: currentOwnerENSNameSafe = $currentOwnerENSName || currentOwnerENSNameAlt;
-  $: currentOwnerIndexSafe = $currentOwnerIndex || currentOwnerIndexAlt;
-
-  $: showConnectButton = $connectionRequired || waitingForConnection;
+  $: showWalletInstallNotice = !$ethereum;
+  $: showConnectButton = !$accountAvailable || waitingForConnection;
   $: showSwitchNetworkButton =
     !showConnectButton && ($networkSwitchRequired || waitingForNetworkSwitch);
   $: isOwner =
-    $signerAddress &&
+    $firstAccount &&
     $currentOwnerAddress &&
-    $signerAddress.toLowerCase() === $currentOwnerAddress.toLowerCase();
+    $firstAccount.toLowerCase() === $currentOwnerAddress.toLowerCase();
 
-  $: currentOwnerText = currentOwnerENSNameSafe || "...";
-  $: currentOwnerIndexText = currentOwnerIndexSafe
-    ? " (#" + currentOwnerIndexSafe.toString() + ")"
+  $: currentOwnerText = $currentOwnerENSName || "...";
+  $: currentOwnerIndexText = $currentOwnerIndex
+    ? " (#" + $currentOwnerIndex.toString() + ")"
     : "";
 
   let receiverName = "";
@@ -49,7 +43,6 @@
   async function connect() {
     waitingForConnection = true;
     try {
-      await defaultEvmStores.setProvider();
       await $provider.send("eth_requestAccounts", []);
       await switchNetwork();
     } finally {
@@ -109,7 +102,7 @@
 
       try {
         const tx = await $ensChainLetterContract.transferLetter(
-          $signerAddress,
+          $firstAccount,
           hash,
           "0x"
         );
@@ -123,48 +116,15 @@
       waitingForTransfer = false;
     }
   }
-
-  onMount(async () => {
-    let provider;
-    if (!window.ethereum) {
-      provider = new ethers.providers.JsonRpcProvider(
-        env.PUBLIC_RPC_URL,
-        deployment.chainId
-      );
-    } else {
-      const accounts = await window.ethereum.request({
-        method: "eth_accounts",
-      });
-      if (accounts.length === 0) {
-        provider = new ethers.providers.Web3Provider(
-          window.ethereum,
-          deployment.chainId
-        );
-      } else {
-        await defaultEvmStores.setProvider();
-        return;
-      }
-    }
-    const contract = new ethers.Contract(
-      deployment.ensChainLetter.address,
-      deployment.ensChainLetter.abi,
-      provider
-    );
-    const ownerAddress = await contract.ownerOf(0);
-    currentOwnerENSNameAlt = ownerAddress;
-    currentOwnerIndexAlt = await contract.numLetterTransfers();
-    const ownerENSName = await provider.lookupAddress(ownerAddress);
-    currentOwnerENSNameAlt = ownerENSName;
-  });
 </script>
 
 <h2 class="text-white text-4xl text-center mb-4 mt-24">
-  Current owner: <Link href="/stamp/{currentOwnerIndexSafe}"
+  Current owner: <Link href="/stamp/{$currentOwnerIndex}"
     ><span class="font-semibold"
       ><ColorfulText
         text={currentOwnerText}
         rainbow={false}
-        colorIndex={currentOwnerIndexSafe - 1}
+        colorIndex={$currentOwnerIndex - 1}
         underlineOnHover={true}
       /></span
     ></Link
@@ -172,12 +132,14 @@
   <ColorfulText
     text={currentOwnerIndexText}
     rainbow={false}
-    colorIndex={currentOwnerIndexSafe - 1}
+    colorIndex={$currentOwnerIndex - 1}
   />
 </h2>
 
 <div class="mx-auto text-center">
-  {#if showConnectButton}
+  {#if showWalletInstallNotice}
+    <p class="text-white text-center my-4 max-w-lg mx-auto">No wallet found.</p>
+  {:else if showConnectButton}
     <Button on:click={connect} waiting={waitingForConnection}>
       Connect wallet
     </Button>

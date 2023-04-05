@@ -28,7 +28,6 @@
     "chroma-js": "^2.4.2",
     "dotenv": "^16.0.3",
     "fastq": "^1.15.0",
-    "mathjs": "^11.6.0",
-    "svelte-ethers-store": "^2.5.12"
+    "mathjs": "^11.6.0"
   }
 }

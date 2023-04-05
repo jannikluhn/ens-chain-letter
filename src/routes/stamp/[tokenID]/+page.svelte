@@ -1,16 +1,12 @@
 <script>
-  import { ethers } from "ethers";
-  import { onMount } from "svelte";
   import Footer from "../../../Footer.svelte";
   import Title from "../../../Title.svelte";
   import ColorfulText from "../../../ColorfulText.svelte";
   import Link from "../../../Link.svelte";
-  import { provider, defaultEvmStores } from "svelte-ethers-store";
+  import { provider } from "../../../ethereum.js";
   import { ensChainLetterContract } from "../../../stores.js";
-  import { env } from "$env/dynamic/public";
-  import * as deployment from "../../../deployment.js";
-  export let data;
 
+  export let data;
   let ownerAddress;
   let owner;
 
@@ -25,51 +21,13 @@
   }
   $: {
     if (!ownerAddress) {
-      owner = undefined;
-    } else if (!$provider) {
-      owner = ownerAddress;
+      owner = null;
     } else {
       $provider.lookupAddress(ownerAddress).then((name) => {
         owner = name;
       });
     }
   }
-
-  onMount(async () => {
-    /* const accounts = await window.ethereum.request({ method: "eth_accounts" }); */
-    /* if (accounts.length) { */
-    /*   await defaultEvmStores.setProvider(); */
-    /* } */
-    let provider;
-    if (!window.ethereum) {
-      provider = new ethers.providers.JsonRpcProvider(
-        env.PUBLIC_RPC_URL,
-        deployment.chainId
-      );
-    } else {
-      const accounts = await window.ethereum.request({
-        method: "eth_accounts",
-      });
-      if (accounts.length === 0) {
-        provider = new ethers.providers.Web3Provider(
-          window.ethereum,
-          deployment.chainId
-        );
-      } else {
-        await defaultEvmStores.setProvider();
-        return;
-      }
-    }
-    const contract = new ethers.Contract(
-      deployment.ensChainLetter.address,
-      deployment.ensChainLetter.abi,
-      provider
-    );
-    const ownerAddress = await contract.ownerOf(0);
-    owner = ownerAddress;
-    const ownerENSName = await provider.lookupAddress(ownerAddress);
-    owner = ownerENSName;
-  });
 </script>
 
 <Title />
